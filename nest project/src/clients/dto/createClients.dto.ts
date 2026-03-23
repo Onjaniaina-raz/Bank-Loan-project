@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsInt, IsPositive, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsPositive, IsString } from 'class-validator';
 
 export class CreateClientsDto {
   @IsString()
@@ -17,4 +17,7 @@ export class CreateClientsDto {
 
   @IsString()
   phone: string;
+
+  @IsBoolean()
+  isBlacklisted: boolean;
 }

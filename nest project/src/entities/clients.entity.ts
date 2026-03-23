@@ -19,4 +19,7 @@ export class Clients {
 
   @Column()
   phone: string;
+
+  @Column({ type: 'boolean', default: false })
+  isBlacklisted: boolean;
 }
