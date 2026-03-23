@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsBoolean, IsInt, IsPositive, IsString } from 'class-validator';
 
 export class CreateClientsDto {

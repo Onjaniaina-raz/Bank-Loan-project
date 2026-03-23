@@ -14,10 +14,10 @@ export class Banks {
   @Column({ type: 'int' })
   interestRate: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'bigint', nullable: true })
   minLoanAmount: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'bigint', nullable: true })
   maxLoanAmount: number;
 
   @Column({ type: 'int', nullable: true })
