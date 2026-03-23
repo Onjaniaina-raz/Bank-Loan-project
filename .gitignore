@@ -1,0 +1,40 @@
+# Dependencies
+**/node_modules/
+**/package-lock.json
+**/yarn.lock
+
+# Build outputs
+**/dist/
+**/build/
+**/out/
+**/android/app/build/
+**/ios/build/
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+**/logs/
+**/*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# React Native specific
+**/.expo/
+**/ios/Pods/
+**/android/.gradle/
+
+# NestJS specific
+**/.nest
+
+# Testing coverage
+**/coverage/
