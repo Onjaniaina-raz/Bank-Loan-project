@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Bankloan } from './bankloan.entity';
 
 @Entity()
 export class Clients {
@@ -22,4 +23,7 @@ export class Clients {
 
   @Column({ type: 'boolean', default: false })
   isBlacklisted: boolean;
+
+  @OneToOne(() => Bankloan, (bankloan) => bankloan.clients)
+  bankloan: Bankloan;
 }

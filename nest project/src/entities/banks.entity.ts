@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Bankloan } from './bankloan.entity';
 
 @Entity()
 export class Banks {
@@ -22,4 +23,7 @@ export class Banks {
 
   @Column({ type: 'int', nullable: true })
   maxLoanTermMonths: number;
+
+  @OneToOne(() => Bankloan, (bankloan) => bankloan.banks)
+  bankloan: Bankloan;
 }
