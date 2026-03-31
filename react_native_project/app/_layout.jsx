@@ -5,8 +5,8 @@ const RootLayout = () => {
   return (
     <>
       <Stack screenOptions={{
-        headerStyle: {backgroundColor: 'white'},
-        headerTintColor: "#464e47"
+        headerStyle: {backgroundColor: '#464e47'},
+        headerTintColor: "#fff"
       }}>
         <Stack.Screen name="index" options={{title:'Home', headerShown: false }}/>
         <Stack.Screen name="(dashboard)" options={{title:'Bank loan Management'}}/>

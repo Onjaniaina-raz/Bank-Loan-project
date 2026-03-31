@@ -15,7 +15,7 @@ const Home = () => {
           Welcome to Bank Loan Management app
         </Text>
         <Pressable
-          className="w-[300px] flex flex-row justify-center items-center gap-2 bg-bank-04 py-4 rounded-lg"
+          className="w-[300px] flex flex-row justify-center items-center gap-2 bg-bank-04 py-4 rounded-lg active:opacity-75"
           activeOpacity={0.7}
           onPress={() => router.push('/list')}
         >

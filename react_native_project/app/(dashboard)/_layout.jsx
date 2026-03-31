@@ -35,7 +35,7 @@ const DashboardLayout = () => {
       <Tabs.Screen
         name="create"
         options={{
-          title: "Add",
+          title: "Create",
           tabBarIcon: ({ focused }) => (
             <Ionicons
               size={24}
