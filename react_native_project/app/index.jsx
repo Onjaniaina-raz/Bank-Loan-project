@@ -1,7 +1,8 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Image, Pressable, Text, View } from "react-native";
 import Logo from "../assets/img/logo.png";
 import "../styles/global.css";
-import { Ionicons } from "@expo/vector-icons";
+import { router } from 'expo-router';
 
 const Home = () => {
   return (
@@ -10,12 +11,17 @@ const Home = () => {
         <Image source={Logo} className="h-full w-full" />
       </View>
       <View className="w-fit flex items-center gap-9">
-        <Text className="text-bank-05">Welcome to Bank Loan Management app</Text>
-        <View className="w-[300px] flex items-center bg-bank-04 py-4 rounded-lg">
-          <Text className="text-bank-01 flex gap-2">
-            Getting Started <Ionicons name="arrow-forward" />
-          </Text>
-        </View>
+        <Text className="text-bank-05">
+          Welcome to Bank Loan Management app
+        </Text>
+        <Pressable
+          className="w-[300px] flex flex-row justify-center items-center gap-2 bg-bank-04 py-4 rounded-lg"
+          activeOpacity={0.7}
+          onPress={() => router.push('/list')}
+        >
+          <Text className="text-bank-01">Getting Started</Text>
+          <Ionicons name="arrow-forward" color="#f1fffa" size={18} />
+        </Pressable>
       </View>
     </View>
   );

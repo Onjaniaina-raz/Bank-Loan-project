@@ -10,8 +10,8 @@ module.exports = {
     extend: {
       colors: {
         //Enchanted forest
-        'bank-02': '#ccfccb',
         'bank-01': '#f1fffa',
+        'bank-02': '#ccfccb',
         'bank-03': '#96e6b3',
         'bank-04': '#568259',
         'bank-05': '#464e47',
