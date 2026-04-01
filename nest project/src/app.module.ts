@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ClientsModule } from './clients/clients.module';
 import { BanksModule } from './banks/banks.module';
 import { BankloanModule } from './bankloan/bankloan.module';
+import { Projet30Module } from './projet30/projet30.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BankloanModule } from './bankloan/bankloan.module';
     ClientsModule,
     BanksModule,
     BankloanModule,
+    Projet30Module,
   ],
   controllers: [AppController],
   providers: [AppService],
