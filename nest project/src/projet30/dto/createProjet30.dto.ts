@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsInt,
-  IsNumber,
-  IsString,
-  Min,
-  IsOptional,
-} from 'class-validator';
+import { IsDate, IsInt, IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateProjet30Dto {
   @IsString()
@@ -22,10 +15,9 @@ export class CreateProjet30Dto {
   @Min(0)
   amount: number;
 
-  @IsOptional()
   @Type(() => Date)
   @IsDate()
-  date?: Date;
+  date: Date;
 
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
