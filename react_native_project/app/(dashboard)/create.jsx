@@ -30,10 +30,10 @@ const create = () => {
               placeholder="Amount"
             />
 
-            <TextInput
+            {/* <TextInput
               className="p-6 rounded-lg border border-bank-05"
-              placeholder="Date"
-            />
+              placeholder="Date (YYYY-MM-DD)"
+            /> */}
 
             <TextInput
               className="p-6 rounded-lg border border-bank-05"

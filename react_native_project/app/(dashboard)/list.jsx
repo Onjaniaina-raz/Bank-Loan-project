@@ -1,36 +1,48 @@
-import { useState } from "react";
-import { FlatList, Text, TextInput, View, Pressable } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  FlatList,
+  Text,
+  TextInput,
+  View,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import api from "../services/api";
 import "../../styles/global.css";
 
-const loanData = [
-  {
-    id: "1",
-    accountNumber: "123456789",
-    client: "John Doe",
-    bank: "Chase Bank",
-    amount: 5000,
-    date: "2024-03-31",
-    loanPercent: 5.5,
-  },
-  {
-    id: "2",
-    accountNumber: "987654321",
-    client: "Jane Smith",
-    bank: "Bank of America",
-    amount: 10000,
-    date: "2024-03-30",
-    loanPercent: 4.2,
-  },
-];
-
 const List = () => {
+  const [loans, setLoans] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredData = loanData.filter((item) =>
-    item.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.bank.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.accountNumber.includes(searchQuery)
+  useEffect(() => {
+    fetchLoans();
+  }, []);
+
+  const fetchLoans = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/projet30");
+      setLoans(response.data);
+    } catch (error) {
+      console.error("Error fetching loans:", error);
+      Alert.alert(
+        "Error",
+        "Failed to load loans. Please check your connection.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter loans based on search query
+  const filteredData = loans.filter(
+    (item) =>
+      item.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.bank.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.account_number.toString().includes(searchQuery),
   );
 
   const getInterestColor = (percent) => {
@@ -38,6 +50,53 @@ const List = () => {
     if (percent < 8) return "#ff9800";
     return "#f44336";
   };
+
+  // Delete loan function
+  const handleDelete = (id) => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this loan?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.delete(`/projet30/${id}`);
+              // Refresh the list after deletion
+              fetchLoans();
+              Alert.alert("Success", "Loan deleted successfully");
+            } catch (error) {
+              console.error("Error deleting loan:", error);
+              Alert.alert("Error", "Failed to delete loan");
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  // Update loan function (navigate to edit screen)
+  const handleUpdate = (item) => {
+    // Navigate to your update/edit screen here
+    // Example with React Navigation:
+    // navigation.navigate('UpdateLoan', { loan: item });
+    console.log("Update loan with id:", item.id);
+    Alert.alert(
+      "Update",
+      `Update functionality for ${item.client} will be implemented`,
+    );
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-bank-01 justify-center items-center">
+        <ActivityIndicator size="large" color="#568259" />
+        <Text className="mt-4 text-gray-500">Loading loans...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-bank-01">
@@ -83,21 +142,23 @@ const List = () => {
         renderItem={({ item }) => (
           <Pressable className="mx-4 mb-3">
             <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              {/* Header - Client and Amount */}
+              {/* Header - Client and Amount with Action Buttons */}
               <View className="flex-row justify-between items-center mb-3 pb-2 border-b border-gray-100">
-                <View className="flex-row items-center gap-2">
+                <View className="flex-row items-center gap-2 flex-1">
                   <View className="bg-bank-01 rounded-full p-2">
                     <Ionicons name="person-outline" size={18} color="#568259" />
                   </View>
-                  <View>
+                  <View className="flex-1">
                     <Text className="font-bold text-bank-05 text-base">
                       {item.client}
                     </Text>
                     <Text className="text-gray-400 text-xs">
-                      Acc: {item.accountNumber}
+                      Acc: {item.account_number}
                     </Text>
                   </View>
                 </View>
+
+                {/* Amount Badge */}
                 <View className="bg-green-50 px-3 py-1 rounded-full flex-row items-center gap-1">
                   <Ionicons name="cash-outline" size={14} color="#4caf50" />
                   <Text className="font-bold text-green-600 text-sm">
@@ -109,30 +170,37 @@ const List = () => {
               {/* Bank Info */}
               <View className="flex-row items-center gap-2 mb-3">
                 <Ionicons name="business-outline" size={16} color="#6b7280" />
-                <Text className="text-gray-600 text-sm">{item.bank}</Text>
+                <Text className="text-gray-600 text-sm flex-1">
+                  {item.bank}
+                </Text>
               </View>
 
               {/* Date and Interest */}
               <View className="flex-row justify-between items-center mb-3">
                 <View className="flex-row items-center gap-1">
                   <Ionicons name="calendar-outline" size={14} color="#9ca3af" />
-                  <Text className="text-gray-400 text-xs">{item.date}</Text>
+                  <Text className="text-gray-400 text-xs">
+                    {new Date(item.date).toLocaleDateString()}
+                  </Text>
                 </View>
-                <View 
+                <View
                   className="px-2 py-1 rounded-full"
-                  style={{ backgroundColor: `${getInterestColor(item.loanPercent)}20` }}
+                  style={{
+                    backgroundColor: `${getInterestColor(item.loan)}20`,
+                  }}
                 >
-                  <Text 
+                  <Text
                     className="text-xs font-semibold"
-                    style={{ color: getInterestColor(item.loanPercent) }}
+                    style={{ color: getInterestColor(item.loan) }}
                   >
-                    {item.loanPercent}% APR
+                    {item.loan}% APR
                   </Text>
                 </View>
               </View>
 
               {/* Total to Pay */}
-              <View className="bg-bank-01 rounded-lg p-3 mt-1">
+              {/* Total to Pay */}
+              <View className="bg-bank-01 rounded-lg p-3 mt-1 mb-3">
                 <View className="flex-row justify-between items-center">
                   <View className="flex-row items-center gap-1">
                     <Ionicons name="wallet-outline" size={16} color="#568259" />
@@ -141,27 +209,72 @@ const List = () => {
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-1">
-                    <Ionicons name="trending-up-outline" size={14} color="#f44336" />
+                    <Ionicons
+                      name="trending-up-outline"
+                      size={14}
+                      color="#f44336"
+                    />
                     <Text className="font-bold text-red-500 text-base">
-                      Ar {(item.amount * (item.loanPercent / 100) + item.amount).toFixed(2)}
+                      
+                      Ar{" "}
+                      {(
+                        Number(item.amount) * (Number(item.loan) / 100) +
+                        Number(item.amount)
+                      ).toFixed(0)}
                     </Text>
                   </View>
                 </View>
                 <View className="flex-row justify-between mt-1">
                   <Text className="text-gray-400 text-xs">
-                    Principal: Ar {item.amount.toLocaleString()}
+                    Principal: Ar {Number(item.amount).toLocaleString()}
                   </Text>
                   <Text className="text-gray-400 text-xs">
-                    Interest: Ar {(item.amount * (item.loanPercent / 100)).toFixed(2)}
+                    Interest: Ar{" "}
+                    {(Number(item.amount) * (Number(item.loan) / 100)).toFixed(
+                      2,
+                    )}
                   </Text>
                 </View>
+              </View>
+
+              {/* Action Buttons - Delete & Update */}
+              <View className="flex-row gap-3">
+                {/* Update Button */}
+                <Pressable
+                  onPress={() => handleUpdate(item)}
+                  className="flex-1 bg-blue-50 py-2 rounded-lg flex-row items-center justify-center gap-2"
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Ionicons name="create-outline" size={18} color="#3b82f6" />
+                  <Text className="text-blue-600 font-semibold text-sm">
+                    Update
+                  </Text>
+                </Pressable>
+
+                {/* Delete Button */}
+                <Pressable
+                  onPress={() => handleDelete(item.id)}
+                  className="flex-1 bg-red-50 py-2 rounded-lg flex-row items-center justify-center gap-2"
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                  <Text className="text-red-600 font-semibold text-sm">
+                    Delete
+                  </Text>
+                </Pressable>
               </View>
             </View>
           </Pressable>
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
+        refreshing={loading}
+        onRefresh={fetchLoans}
         ListEmptyComponent={
           <View className="items-center justify-center py-20">
             <Ionicons name="search-outline" size={64} color="#d1d5db" />
@@ -169,7 +282,9 @@ const List = () => {
               No loans found
             </Text>
             <Text className="text-gray-300 text-sm mt-1">
-              Try searching for something else
+              {searchQuery
+                ? "Try searching for something else"
+                : "Pull down to refresh"}
             </Text>
           </View>
         }
