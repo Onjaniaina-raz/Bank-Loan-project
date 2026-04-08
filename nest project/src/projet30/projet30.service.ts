@@ -27,12 +27,18 @@ export class Projet30Service {
   }
 
   async create(dto: CreateProjet30Dto) {
-    return await this.projetRepo.save(dto);
+    const newLoan = {
+      ...dto,
+      date: new Date(), // Current date
+    };
+
+    return await this.projetRepo.save(newLoan);
   }
 
   async update(id: number, dto: UpdateProjet30Dto) {
     return await this.projetRepo.update({ id }, dto);
   }
+
   async delete(id: number) {
     return await this.projetRepo.delete(id);
   }
