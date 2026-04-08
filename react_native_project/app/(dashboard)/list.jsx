@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from 'expo-router';
 import api from "../services/api";
 import "../../styles/global.css";
 
@@ -37,7 +38,6 @@ const List = () => {
     }
   };
 
-  // Filter loans based on search query
   const filteredData = loans.filter(
     (item) =>
       item.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,7 +51,6 @@ const List = () => {
     return "#f44336";
   };
 
-  // Delete loan function
   const handleDelete = (id) => {
     Alert.alert(
       "Confirm Delete",
@@ -77,17 +76,12 @@ const List = () => {
     );
   };
 
-  // Update loan function (navigate to edit screen)
   const handleUpdate = (item) => {
-    // Navigate to your update/edit screen here
-    // Example with React Navigation:
-    // navigation.navigate('UpdateLoan', { loan: item });
-    console.log("Update loan with id:", item.id);
-    Alert.alert(
-      "Update",
-      `Update functionality for ${item.client} will be implemented`,
-    );
-  };
+  router.push({
+    pathname: '/update',
+    params: { loanId: item.id }
+  });
+};
 
   if (loading) {
     return (
@@ -99,6 +93,7 @@ const List = () => {
   }
 
   return (
+    
     <View className="flex-1 bg-bank-01">
       {/* Header */}
       <View className="bg-bank-05 pt-12 pb-4 px-4">
