@@ -38,6 +38,19 @@ const List = () => {
     }
   };
 
+  // Function to format date as "day - month name - year"
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} - ${month} - ${year}`;
+  };
+
   const filteredData = loans.filter(
     (item) =>
       item.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,11 +90,11 @@ const List = () => {
   };
 
   const handleUpdate = (item) => {
-  router.push({
-    pathname: '/update',
-    params: { loanId: item.id }
-  });
-};
+    router.push({
+      pathname: '/update',
+      params: { loanId: item.id }
+    });
+  };
 
   if (loading) {
     return (
@@ -157,7 +170,7 @@ const List = () => {
                 <View className="bg-green-50 px-3 py-1 rounded-full flex-row items-center gap-1">
                   <Ionicons name="cash-outline" size={14} color="#4caf50" />
                   <Text className="font-bold text-green-600 text-sm">
-                    Ar {item.amount.toLocaleString()}
+                    Ar {Number(item.amount).toLocaleString()}
                   </Text>
                 </View>
               </View>
@@ -175,25 +188,24 @@ const List = () => {
                 <View className="flex-row items-center gap-1">
                   <Ionicons name="calendar-outline" size={14} color="#9ca3af" />
                   <Text className="text-gray-400 text-xs">
-                    {new Date(item.date).toLocaleDateString()}
+                    {formatDate(item.date)}
                   </Text>
                 </View>
                 <View
                   className="px-2 py-1 rounded-full"
                   style={{
-                    backgroundColor: `${getInterestColor(item.loan)}20`,
+                    backgroundColor: `${getInterestColor(Number(item.loan))}20`,
                   }}
                 >
                   <Text
                     className="text-xs font-semibold"
-                    style={{ color: getInterestColor(item.loan) }}
+                    style={{ color: getInterestColor(Number(item.loan)) }}
                   >
-                    {item.loan}% APR
+                    {Number(item.loan)}% APR
                   </Text>
                 </View>
               </View>
 
-              {/* Total to Pay */}
               {/* Total to Pay */}
               <View className="bg-bank-01 rounded-lg p-3 mt-1 mb-3">
                 <View className="flex-row justify-between items-center">
@@ -210,7 +222,6 @@ const List = () => {
                       color="#f44336"
                     />
                     <Text className="font-bold text-red-500 text-base">
-                      
                       Ar{" "}
                       {(
                         Number(item.amount) * (Number(item.loan) / 100) +
