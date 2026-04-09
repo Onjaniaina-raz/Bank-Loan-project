@@ -41,6 +41,7 @@ const List = () => {
   // Function to format date as "day - month name - year"
   const formatDate = (dateString) => {
     const date = new Date(dateString);
+    date.setHours(date.getHours() + 3);
     const day = date.getDate();
     const monthNames = [
       "January", "February", "March", "April", "May", "June",

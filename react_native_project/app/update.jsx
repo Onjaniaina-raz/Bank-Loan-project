@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Pressable,
   ScrollView,
@@ -8,6 +8,10 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
@@ -15,7 +19,7 @@ import api from "./services/api";
 import "../styles/global.css";
 
 const Update = () => {
-  const { loanId } = useLocalSearchParams(); // Get loanId from URL params
+  const { loanId } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,7 +39,16 @@ const Update = () => {
     year: "",
   });
 
-  // Rest of your code remains the same...
+  // Refs for scrolling to inputs
+  const scrollViewRef = useRef();
+  const inputRefs = {
+    account_number: useRef(),
+    client: useRef(),
+    bank: useRef(),
+    amount: useRef(),
+    loan: useRef(),
+  };
+
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
   const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
   const years = Array.from({ length: 50 }, (_, i) =>
@@ -96,7 +109,7 @@ const Update = () => {
     } catch (error) {
       console.error("Error fetching loan:", error);
       Alert.alert("Error", "Failed to load loan data");
-      router.back(); // Use router.back() instead of navigation.goBack()
+      router.back();
     } finally {
       setLoading(false);
     }
@@ -107,6 +120,7 @@ const Update = () => {
   };
 
   const openDatePicker = () => {
+    Keyboard.dismiss();
     setTempDate({
       day: formData.day,
       month: formData.month,
@@ -126,7 +140,7 @@ const Update = () => {
   };
 
   const handleUpdate = async () => {
-    // Validation
+    Keyboard.dismiss();
     if (
       !formData.account_number ||
       !formData.client ||
@@ -138,10 +152,8 @@ const Update = () => {
       return;
     }
 
-    // Create date string in YYYY-MM-DD format for backend
     const dateString = `${formData.year}-${formData.month.padStart(2, "0")}-${formData.day.padStart(2, "0")}`;
 
-    // Prepare data for backend
     const loanData = {
       account_number: parseInt(formData.account_number),
       client: formData.client,
@@ -159,7 +171,7 @@ const Update = () => {
         {
           text: "OK",
           onPress: () => {
-            router.back(); // Go back to list
+            router.back();
           },
         },
       ]);
@@ -169,6 +181,14 @@ const Update = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Handle focus to scroll to input
+  const handleInputFocus = (field, yPosition) => {
+    scrollViewRef.current?.scrollTo({
+      y: yPosition,
+      animated: true,
+    });
   };
 
   if (loading) {
@@ -181,88 +201,121 @@ const Update = () => {
   }
 
   return (
-    <View className="flex-1 bg-bank-01 flex items-center justify-center gap-8">
-      <Text className="relative bottom-4 font-bold text-bank-05 text-balance text-xl">
-        U p d a t e L o a n{" "}
-        <Ionicons name="create-outline" size={24} color="#464e47" />
-      </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1 bg-bank-01"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View className="flex-1 bg-bank-01">
+          <Text className="text-center mt-12 font-bold text-bank-05 text-xl">
+            U p d a t e    L o a n{" "}
+            <Ionicons name="create-outline" size={24} color="#464e47" />
+          </Text>
 
-      <View className="bg-white w-[80%] h-[60%] rounded-lg border">
-        <ScrollView className="h-full w-full px-6 my-8">
-          <View className="flex gap-6">
-            {/* Date Picker Button */}
-            <Pressable
-              onPress={openDatePicker}
-              className="bg-bank-01 rounded-lg p-4 flex-row items-center justify-between active:opacity-75"
+          <View className="bg-white w-[90%] h-[70%] rounded-lg border self-center mt-8">
+            <ScrollView
+              ref={scrollViewRef}
+              className="h-full w-full px-6 py-4"
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
             >
-              <View className="flex-row items-center gap-2">
-                <Ionicons name="calendar-outline" size={20} color="#568259" />
-                <Text className="text-bank-05 font-semibold">Select Date:</Text>
+              <View className="flex gap-4 pb-8">
+                {/* Date Picker Button */}
+                <Pressable
+                  onPress={openDatePicker}
+                  className="bg-bank-01 rounded-lg p-4 flex-row items-center justify-between active:opacity-75"
+                >
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="calendar-outline" size={20} color="#568259" />
+                    <Text className="text-bank-05 font-semibold">Select Date:</Text>
+                  </View>
+                  <View className="flex-row items-center gap-2">
+                    <Text className="text-bank-05 font-bold text-base">
+                      {getCurrentDateDisplay()}
+                    </Text>
+                    <Ionicons name="chevron-down" size={18} color="#568259" />
+                  </View>
+                </Pressable>
+
+                <TextInput
+                  ref={inputRefs.account_number}
+                  className="p-4 rounded-lg border border-bank-05 bg-white"
+                  placeholder="Account number"
+                  keyboardType="numeric"
+                  value={formData.account_number}
+                  onChangeText={(text) => handleChange("account_number", text)}
+                  onFocus={() => handleInputFocus('account_number', 0)}
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.client.current?.focus()}
+                />
+
+                <TextInput
+                  ref={inputRefs.client}
+                  className="p-4 rounded-lg border border-bank-05 bg-white"
+                  placeholder="Client"
+                  value={formData.client}
+                  onChangeText={(text) => handleChange("client", text)}
+                  onFocus={() => handleInputFocus('client', 100)}
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.bank.current?.focus()}
+                />
+
+                <TextInput
+                  ref={inputRefs.bank}
+                  className="p-4 rounded-lg border border-bank-05 bg-white"
+                  placeholder="Bank"
+                  value={formData.bank}
+                  onChangeText={(text) => handleChange("bank", text)}
+                  onFocus={() => handleInputFocus('bank', 200)}
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.amount.current?.focus()}
+                />
+
+                <TextInput
+                  ref={inputRefs.amount}
+                  className="p-4 rounded-lg border border-bank-05 bg-white"
+                  placeholder="Amount"
+                  keyboardType="numeric"
+                  value={formData.amount}
+                  onChangeText={(text) => handleChange("amount", text)}
+                  onFocus={() => handleInputFocus('amount', 300)}
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.loan.current?.focus()}
+                />
+
+                <TextInput
+                  ref={inputRefs.loan}
+                  className="p-4 rounded-lg border border-bank-05 bg-white"
+                  placeholder="Loan %"
+                  keyboardType="numeric"
+                  value={formData.loan}
+                  onChangeText={(text) => handleChange("loan", text)}
+                  onFocus={() => handleInputFocus('loan', 400)}
+                  returnKeyType="done"
+                  onSubmitEditing={handleUpdate}
+                />
               </View>
-              <View className="flex-row items-center gap-2">
-                <Text className="text-bank-05 font-bold text-base">
-                  {getCurrentDateDisplay()}
-                </Text>
-                <Ionicons name="chevron-down" size={18} color="#568259" />
-              </View>
-            </Pressable>
-
-            <TextInput
-              className="p-4 rounded-lg border border-bank-05"
-              placeholder="Account number"
-              keyboardType="numeric"
-              value={formData.account_number}
-              onChangeText={(text) => handleChange("account_number", text)}
-            />
-
-            <TextInput
-              className="p-4 rounded-lg border border-bank-05"
-              placeholder="Client"
-              value={formData.client}
-              onChangeText={(text) => handleChange("client", text)}
-            />
-
-            <TextInput
-              className="p-4 rounded-lg border border-bank-05"
-              placeholder="Bank"
-              value={formData.bank}
-              onChangeText={(text) => handleChange("bank", text)}
-            />
-
-            <TextInput
-              className="p-4 rounded-lg border border-bank-05"
-              placeholder="Amount"
-              keyboardType="numeric"
-              value={formData.amount}
-              onChangeText={(text) => handleChange("amount", text)}
-            />
-
-            <TextInput
-              className="p-4 rounded-lg border border-bank-05"
-              placeholder="Loan %"
-              keyboardType="numeric"
-              value={formData.loan}
-              onChangeText={(text) => handleChange("loan", text)}
-            />
+            </ScrollView>
           </View>
-        </ScrollView>
-      </View>
 
-      <Pressable
-        className="w-[300px] flex flex-row justify-center items-center gap-2 bg-bank-04 py-4 rounded-lg active:opacity-75"
-        activeOpacity={0.7}
-        onPress={handleUpdate}
-        disabled={submitting}
-      >
-        {submitting ? (
-          <ActivityIndicator color="#f1fffa" />
-        ) : (
-          <>
-            <Text className="text-bank-01">U P D A T E</Text>
-            <Ionicons name="refresh-outline" color="#f1fffa" size={18} />
-          </>
-        )}
-      </Pressable>
+          <Pressable
+            className="w-[90%] self-center flex flex-row justify-center items-center gap-2 bg-bank-04 py-4 rounded-lg active:opacity-75 mt-6"
+            activeOpacity={0.7}
+            onPress={handleUpdate}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color="#f1fffa" />
+            ) : (
+              <>
+                <Text className="text-bank-01 font-bold">U P D A T E</Text>
+                <Ionicons name="refresh-outline" color="#f1fffa" size={18} />
+              </>
+            )}
+          </Pressable>
+        </View>
+      </TouchableWithoutFeedback>
 
       {/* Custom Date Picker Modal */}
       <Modal visible={showDatePicker} transparent={true} animationType="slide">
@@ -283,7 +336,7 @@ const Update = () => {
                 <Text className="text-center font-semibold text-bank-05 mb-2">
                   Day
                 </Text>
-                <ScrollView className="h-48">
+                <ScrollView className="h-48" nestedScrollEnabled={true}>
                   {days.map((day) => (
                     <Pressable
                       key={day}
@@ -311,7 +364,7 @@ const Update = () => {
                 <Text className="text-center font-semibold text-bank-05 mb-2">
                   Month
                 </Text>
-                <ScrollView className="h-48">
+                <ScrollView className="h-48" nestedScrollEnabled={true}>
                   {months.map((month) => (
                     <Pressable
                       key={month}
@@ -339,7 +392,7 @@ const Update = () => {
                 <Text className="text-center font-semibold text-bank-05 mb-2">
                   Year
                 </Text>
-                <ScrollView className="h-48">
+                <ScrollView className="h-48" nestedScrollEnabled={true}>
                   {years.map((year) => (
                     <Pressable
                       key={year}
@@ -374,7 +427,7 @@ const Update = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
